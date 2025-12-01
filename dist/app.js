@@ -13,7 +13,10 @@ const middleware_1 = require("./src/app/common/middleware");
 const app = (0, express_1.default)();
 exports.app = app;
 app.use((0, compression_1.default)());
-const allowedOrigins = ["https://retreat-zv61.vercel.app"];
+const allowedOrigins = [
+    "https://retreat-zv61.vercel.app",
+    "http://localhost:3000",
+];
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
         if (!origin)

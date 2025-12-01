@@ -11,7 +11,10 @@ const app = express();
 app.use(compression());
 
 // CORS configuration
-const allowedOrigins = ["https://retreat-zv61.vercel.app"];
+const allowedOrigins = [
+  "https://retreat-zv61.vercel.app",
+  "http://localhost:3000",
+];
 
 app.use(
   cors({

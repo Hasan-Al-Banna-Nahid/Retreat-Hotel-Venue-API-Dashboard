@@ -13,8 +13,13 @@ export class VenueService {
   ): Promise<{ venues: VenuePreview[]; total: number }> {
     const { city, minCapacity, maxPrice, page = 1, limit = 10 } = filters;
 
-    const where = {
-      ...(city && { city: { contains: city, mode: "insensitive" } }),
+    const where: any = {
+      ...(city && {
+        city: {
+          contains: city,
+          mode: "insensitive" as const,
+        },
+      }),
       ...(minCapacity && { capacity: { gte: minCapacity } }),
       ...(maxPrice && { pricePerNight: { lte: maxPrice } }),
     };
@@ -37,26 +42,35 @@ export class VenueService {
       prisma.venue.count({ where }),
     ]);
 
-    return { venues, total };
+    return {
+      venues: venues as VenuePreview[],
+      total,
+    };
   }
 
   async findById(id: string): Promise<Venue | null> {
-    return prisma.venue.findUnique({
+    const result = await prisma.venue.findUnique({
       where: { id },
     });
+
+    return result as Venue | null;
   }
 
   async create(data: CreateVenueInput): Promise<Venue> {
-    return prisma.venue.create({
+    const result = await prisma.venue.create({
       data,
     });
+
+    return result as Venue;
   }
 
   async update(id: string, data: UpdateVenueInput): Promise<Venue> {
-    return prisma.venue.update({
+    const result = await prisma.venue.update({
       where: { id },
       data,
     });
+
+    return result as Venue;
   }
 
   async delete(id: string): Promise<void> {

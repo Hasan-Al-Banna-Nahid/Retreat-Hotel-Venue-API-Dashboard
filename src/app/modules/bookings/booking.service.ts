@@ -3,11 +3,21 @@ import {
   BookingInquiry,
   CreateBookingInput,
   BookingWithVenue,
-  BookingStatus,
+  BookingStatus as InterfaceBookingStatus,
 } from "./booking.interface";
 import { VenueService } from "../venues/venue.service";
 
 const venueService = new VenueService();
+
+// Import Prisma's BookingStatus
+import { BookingStatus as PrismaBookingStatus } from "@prisma/client";
+
+// Helper to convert Prisma status to interface status
+const convertBookingStatus = (
+  status: PrismaBookingStatus
+): InterfaceBookingStatus => {
+  return status as InterfaceBookingStatus;
+};
 
 export class BookingService {
   async create(data: CreateBookingInput): Promise<BookingWithVenue> {
@@ -43,7 +53,7 @@ export class BookingService {
       throw new Error("Venue is not available for the selected dates");
     }
 
-    return prisma.bookingInquiry.create({
+    const result = await prisma.bookingInquiry.create({
       data,
       include: {
         venue: {
@@ -55,10 +65,16 @@ export class BookingService {
         },
       },
     });
+
+    // Convert the result to match the interface
+    return {
+      ...result,
+      status: convertBookingStatus(result.status),
+    };
   }
 
   async findById(id: string): Promise<BookingWithVenue | null> {
-    return prisma.bookingInquiry.findUnique({
+    const result = await prisma.bookingInquiry.findUnique({
       where: { id },
       include: {
         venue: {
@@ -70,6 +86,13 @@ export class BookingService {
         },
       },
     });
+
+    if (!result) return null;
+
+    return {
+      ...result,
+      status: convertBookingStatus(result.status),
+    };
   }
 
   async findAll(
@@ -96,11 +119,17 @@ export class BookingService {
       prisma.bookingInquiry.count(),
     ]);
 
-    return { bookings, total };
+    // Convert each booking's status
+    const convertedBookings = bookings.map((booking) => ({
+      ...booking,
+      status: convertBookingStatus(booking.status),
+    }));
+
+    return { bookings: convertedBookings, total };
   }
 
   async findAllByVenue(venueId: string): Promise<BookingInquiry[]> {
-    return prisma.bookingInquiry.findMany({
+    const results = await prisma.bookingInquiry.findMany({
       where: { venueId },
       include: {
         venue: {
@@ -113,15 +142,24 @@ export class BookingService {
       },
       orderBy: { createdAt: "desc" },
     });
+
+    // Convert status for each booking
+    return results.map((result) => ({
+      ...result,
+      status: convertBookingStatus(result.status),
+    }));
   }
 
   async updateStatus(
     id: string,
-    status: BookingStatus
+    status: InterfaceBookingStatus
   ): Promise<BookingWithVenue | null> {
-    return prisma.bookingInquiry.update({
+    // Convert interface status to Prisma status
+    const prismaStatus = status as PrismaBookingStatus;
+
+    const result = await prisma.bookingInquiry.update({
       where: { id },
-      data: { status },
+      data: { status: prismaStatus },
       include: {
         venue: {
           select: {
@@ -132,5 +170,10 @@ export class BookingService {
         },
       },
     });
+
+    return {
+      ...result,
+      status: convertBookingStatus(result.status),
+    };
   }
 }

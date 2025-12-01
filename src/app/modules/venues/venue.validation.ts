@@ -12,22 +12,25 @@ export const createVenueSchema = z.object({
 
 export const updateVenueSchema = createVenueSchema.partial();
 
+// FIXED: Make all query params truly optional
 export const venueFilterSchema = z.object({
-  city: z.string().optional(),
+  city: z.string().optional().catch(undefined),
   minCapacity: z
     .string()
-    .transform(Number)
-    .pipe(z.number().int().nonnegative().optional()),
+    .optional()
+    .catch(undefined)
+    .transform((val) => (val ? parseInt(val) : undefined)),
   maxPrice: z
     .string()
-    .transform(Number)
-    .pipe(z.number().int().nonnegative().optional()),
+    .optional()
+    .catch(undefined)
+    .transform((val) => (val ? parseInt(val) : undefined)),
   page: z
     .string()
-    .transform(Number)
-    .pipe(z.number().int().positive().default(1)),
+    .default("1")
+    .transform((val) => parseInt(val)),
   limit: z
     .string()
-    .transform(Number)
-    .pipe(z.number().int().positive().max(100).default(10)),
+    .default("10")
+    .transform((val) => parseInt(val)),
 });

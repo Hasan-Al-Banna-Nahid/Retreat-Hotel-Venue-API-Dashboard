@@ -4,7 +4,6 @@ import compression from "compression";
 import { venueRoutes } from "./src/app/modules/venues/venue.routes";
 import { bookingRoutes } from "./src/app/modules/bookings/booking.routes";
 import { errorHandler, notFoundHandler } from "./src/app/common/middleware";
-import { CORS_ORIGIN } from "./src/app/config/constants";
 
 const app = express();
 

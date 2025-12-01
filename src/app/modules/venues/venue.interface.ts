@@ -31,7 +31,6 @@ export interface VenueFilterParams {
   limit?: number;
 }
 
-// O(1) access utility types
 export type VenuePreview = Pick<
   Venue,
   "id" | "name" | "city" | "capacity" | "pricePerNight" | "images"

@@ -8,7 +8,6 @@ import {
 } from "./venue.interface";
 
 export class VenueService {
-  // O(log n) - Prisma uses indexed queries
   async findAll(
     filters: VenueFilterParams
   ): Promise<{ venues: VenuePreview[]; total: number }> {
@@ -41,7 +40,6 @@ export class VenueService {
     return { venues, total };
   }
 
-  // O(1) - Primary key lookup
   async findById(id: string): Promise<Venue | null> {
     return prisma.venue.findUnique({
       where: { id },
@@ -67,7 +65,6 @@ export class VenueService {
     });
   }
 
-  // O(1) - Check capacity constraint
   async validateCapacity(
     venueId: string,
     attendeeCount: number

@@ -17,7 +17,6 @@ export class BookingService {
       throw new Error("Venue not found");
     }
 
-    // O(1) capacity validation
     const isValidCapacity = await venueService.validateCapacity(
       data.venueId,
       data.attendeeCount
@@ -27,7 +26,6 @@ export class BookingService {
       throw new Error("Attendee count exceeds venue capacity");
     }
 
-    // O(n) - Check for overlapping bookings (could be optimized with proper indexing)
     const overlappingBooking = await prisma.bookingInquiry.findFirst({
       where: {
         venueId: data.venueId,

@@ -1,14 +1,14 @@
 import dotenv from "dotenv";
+import { app } from "./app";
+import { PORT, NODE_ENV } from "./src/app/config/constants";
+import { testDatabaseConnection } from "./src/app/config/database";
+
 // Load environment variables FIRST
 dotenv.config();
 
 console.log("🚀 Starting Hotel Venue API...");
 console.log("🔧 Environment:", process.env.NODE_ENV);
 console.log("🔧 Port:", process.env.PORT);
-
-import { app } from "./app";
-import { PORT, NODE_ENV } from "./src/app/config/constants";
-import { testDatabaseConnection } from "./src/app/config/database";
 
 const startServer = async () => {
   try {

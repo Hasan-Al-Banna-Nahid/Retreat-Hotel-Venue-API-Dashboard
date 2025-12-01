@@ -3,9 +3,8 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting database seed...");
+  console.log("Starting database seed...");
 
-  // Clear existing data
   await prisma.bookingInquiry.deleteMany();
   await prisma.venue.deleteMany();
 
@@ -125,7 +124,7 @@ async function main() {
     },
   });
 
-  console.log(`✅ Created sample booking for ${sampleBooking.companyName}`);
+  console.log(`Created sample booking for ${sampleBooking.companyName}`);
 }
 
 main()

@@ -26,7 +26,6 @@ export enum BookingStatus {
   REJECTED = "REJECTED",
 }
 
-// Utility types for specific use cases
 export type BookingPreview = Pick<
   BookingInquiry,
   | "id"

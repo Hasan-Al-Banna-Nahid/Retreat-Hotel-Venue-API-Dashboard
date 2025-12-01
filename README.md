@@ -1,220 +1,103 @@
-# Retreat Venue Booking Platform
+# Retreat Booking Management API
 
-![Retreat Platform Screenshot](https://retreat-zv61.vercel.app/social-card.png) *(This is a placeholder image, please replace with a real screenshot)*
+This project provides a robust API for managing hotel and venue bookings for a retreat. It's built with Node.js, Express, and TypeScript, utilizing Prisma as an ORM for database interactions. The API supports various operations for managing bookings and venues, integrated with a live deployment for demonstration.
 
-Welcome to the Retreat Venue Booking Platform! This application provides a comprehensive solution for managing venue listings and facilitating booking requests. Built with Next.js, React, and powered by a robust API, it offers a seamless experience for both venue administrators and users looking to book the perfect retreat location.
+## Live Site
 
-Live Site: [https://retreat-zv61.vercel.app/](https://retreat-zv61.vercel.app/)
+The API is deployed and accessible at:
+[https://retreat-hotel-venue-api-dashboard.onrender.com/](https://retreat-hotel-venue-api-dashboard.onrender.com/)
 
-## Table of Contents
+## Technologies Used
 
--   [Features](#features)
--   [Technology Stack](#technology-stack)
--   [Project Structure](#project-structure)
--   [Core Components & Pages](#core-components--pages)
-    -   [Pages](#pages)
-    -   [Application-Specific Components (`app/components`)](#application-specific-components-appcomponents)
-    -   [UI Library Components (`components/ui`)](#ui-library-components-componentsui)
--   [Libraries, Hooks, and Types](#libraries-hooks-and-types)
-    -   [API Client (`app/lib/api.ts`)](#api-client-applibapits)
-    -   [Custom Hooks (`app/lib/hooks.ts`)](#custom-hooks-applibhooksts)
-    -   [Utilities (`app/lib/utils.tsx`)](#utilities-applibutilstsa)
-    -   [Global State/Providers (`app/providers/QueryProviders.tsx`)](#global-stateproviders-appprovidersqueryproviderstsa)
-    -   [Type Definitions (`app/types/index.ts`)](#type-definitions-apptypesindex_ts)
--   [How it Works](#how-it-works)
--   [Getting Started](#getting-started)
--   [Contributing](#contributing)
--   [License](#license)
-
-## Features
-
--   **Venue Management:** Create, view, edit, and delete venue listings with details like capacity, price, images, and amenities.
--   **Venue Search & Filtering:** Efficiently search for venues by city, minimum capacity, and maximum price.
--   **Booking Requests:** Users can submit booking requests for specific venues, specifying company details, dates, and attendee counts.
--   **Booking Management:** Administrators can view, filter, search, and update the status (confirm/reject) of booking requests.
--   **Intuitive UI:** A clean and responsive user interface built with Shadcn UI components.
--   **Data Fetching & Caching:** Leverages React Query for efficient, up-to-date data handling.
-
-## Technology Stack
-
--   **Framework:** Next.js 14 (React)
--   **Language:** TypeScript
--   **Styling:** Tailwind CSS
--   **UI Components:** Shadcn UI
--   **Form Management:** React Hook Form, Zod (for validation)
--   **Data Fetching:** React Query (`@tanstack/react-query`)
--   **API Client:** Axios
--   **Date Manipulation:** `date-fns`
--   **Icons:** Lucide React
--   **Backend:** (Assumed external REST API, accessed via `/api` endpoint)
+*   **Node.js**: JavaScript runtime environment.
+*   **Express.js**: Web application framework for Node.js.
+*   **TypeScript**: Statically typed superset of JavaScript.
+*   **Prisma**: Next-generation ORM for Node.js and TypeScript.
+*   **PostgreSQL**: Relational database (assumed, based on Prisma usage).
+*   **Render**: Cloud platform for hosting the live API.
+*   **Vercel**: (Potentially for frontend or serverless functions, though not explicit for this API).
 
 ## Project Structure
 
-The project follows a standard Next.js application structure with logical separation of concerns:
+The project follows a modular and layered architecture to ensure separation of concerns and maintainability.
 
 ```
 .
-├── app/                  # Main application routes, layout, global styles, and core logic
-│   ├── bookings/         # Bookings page and related components/logic
-│   ├── components/       # Reusable components specific to the application's domain
-│   ├── lib/              # API client, custom hooks, and utility functions
-│   ├── providers/        # Global context providers (e.g., React Query)
-│   ├── types/            # TypeScript type definitions
-│   └── venues/           # Venues pages (list and detail) and related components/logic
-├── components/           # General-purpose UI components (e.g., Shadcn UI)
-│   └── ui/               # Re-usable UI components (buttons, cards, forms, etc.)
-└── public/               # Static assets
-└── ...                   # Other configuration files (.gitignore, package.json, etc.)
+├───app.ts                # Main Express application setup
+├───server.ts             # Server entry point and database connection
+├───prisma/               # Prisma schema and migrations
+│   ├───schema.prisma     # Database schema definition
+│   ├───seed.ts           # Database seeding script
+│   └───migrations/       # Database migration files
+└───src/
+    └───app/
+        ├───common/       # Common utilities, middleware, and types
+        │   ├───middleware.ts   # Global Express middleware
+        │   ├───types.ts        # Shared TypeScript type definitions
+        │   └───utils.ts        # Utility functions
+        ├───config/       # Application configuration
+        │   ├───constants.ts    # Global constants
+        │   └───database.ts     # Database connection configuration
+        └───modules/      # Feature-specific modules (e.g., bookings, venues)
+            ├───bookings/
+            │   ├───booking.controller.ts   # Handles booking-related requests
+            │   ├───booking.interface.ts    # Booking model interface
+            │   ├───booking.routes.ts       # Defines booking API endpoints
+            │   ├───booking.service.ts      # Business logic for bookings
+            │   └───booking.validation.ts   # Joi schema for booking validation
+            └───venues/
+                ├───venue.controller.ts     # Handles venue-related requests
+                ├───venue.interface.ts      # Venue model interface
+                ├───venue.routes.ts         # Defines venue API endpoints
+                ├───venue.service.ts        # Business logic for venues
+                └───venue.validation.ts     # Joi schema for venue validation
 ```
 
-## Core Components & Pages
+### How it Works
 
-### Pages
+1.  **`server.ts`**: This is the application's entry point. It initializes the Express app (`app.ts`), sets up the database connection using Prisma, and starts the server.
+2.  **`app.ts`**: Configures the Express application, including applying global middleware, setting up JSON body parsing, and integrating the defined API routes from various modules.
+3.  **`src/app/config`**: Contains configuration files like `constants.ts` for global values and `database.ts` for Prisma client setup and connection.
+4.  **`src/app/common`**:
+    *   **`middleware.ts`**: Defines reusable middleware functions that can be applied globally or to specific routes (e.g., error handling, authentication, logging).
+    *   **`types.ts`**: Holds shared TypeScript interfaces and types used across the application, promoting strong typing and code consistency.
+    *   **`utils.ts`**: Contains general utility functions.
+5.  **`src/app/modules`**: This directory houses the core business logic, organized by feature (e.g., `bookings`, `venues`). Each module typically contains:
+    *   **`.routes.ts`**: Defines the API endpoints (GET, POST, PUT, DELETE) for the module and links them to specific controller methods.
+    *   **`.validation.ts`**: Contains validation schemas (likely using a library like Joi or Zod) to ensure incoming request data adheres to expected formats and rules.
+    *   **`.controller.ts`**: Responsible for handling incoming HTTP requests, calling the appropriate service methods, and sending back HTTP responses. It acts as the interface between the routes and the business logic.
+    *   **`.service.ts`**: Encapsulates the business logic. It interacts with the database (via Prisma) and performs operations specific to the module (e.g., creating a booking, fetching venue details).
+    *   **`.interface.ts`**: Defines the TypeScript interfaces for the data models specific to the module, ensuring type safety throughout the codebase.
 
--   **`/` (Home Page - `app/page.tsx`)**: The main landing page for the application. *(Content not provided in analysis, assumed to be a welcome/overview page)*
--   **`/bookings` (`app/bookings/page.tsx`)**:
-    -   Displays a comprehensive list of all booking requests.
-    -   Allows searching bookings by company name or email.
-    -   Shows essential booking details like venue, company, dates, attendees, and status.
-    -   Utilizes `useBookings` hook for data fetching.
--   **`/venues` (`app/venues/page.tsx`)**:
-    -   Presents a list of available venues with search and filtering capabilities (city, min capacity, max price).
-    -   Offers pagination for browsing large numbers of venues.
-    -   Includes functionality to add new venues via a modal form (`VenueForm`).
-    -   Utilizes `useVenues` hook for data fetching.
--   **`/venues/[id]` (`app/venues/[id]/page.tsx`)**:
-    -   Shows detailed information for a specific venue, including description, images, amenities, capacity, and price.
-    -   Provides a dedicated form (`BookingForm`) to submit a booking request for the displayed venue.
-    -   Utilizes `useVenue` hook to fetch individual venue data.
+### Database (Prisma)
 
-### Application-Specific Components (`app/components`)
+*   **`prisma/schema.prisma`**: This file defines the application's database schema. It describes the models (e.g., `Booking`, `Venue`) and their relationships. Prisma uses this schema to generate a type-safe client and manage migrations.
+*   **`prisma/migrations`**: Stores version-controlled database migrations. When the `schema.prisma` changes, a new migration file is generated to apply those changes to the database.
+*   **`prisma/seed.ts`**: A script used to populate the database with initial data, useful for development and testing environments.
 
--   **`Bookings/BookingForm.tsx`**:
-    -   A dynamic form for creating new booking requests, potentially pre-filled for a specific venue.
-    -   Handles input validation using Zod and `react-hook-form`.
-    -   Interacts with `useCreateBooking` and `useVenues` hooks.
--   **`Bookings/BookingManager.tsx`**:
-    -   An administrative component to view, filter, and manage all booking requests.
-    -   Allows updating booking statuses (CONFIRMED, REJECTED) and provides a placeholder for deletion.
-    -   Uses `useBookings` and `useUpdateBookingStatus` hooks.
--   **`Header/Header.tsx`**:
-    -   The global navigation bar, providing links to the "Home", "Venues", and "Bookings" pages.
-    -   Highlights the currently active page.
--   **`Venue/VenueBookingDashboard.tsx`**:
-    -   Displays statistics and a breakdown of bookings for a particular venue.
-    -   Includes summary cards for total, confirmed, and pending bookings, and estimated revenue.
-    -   Organizes bookings into tabs (Upcoming, Pending, Past).
-    -   Uses `useVenueBookings` hook.
--   **`Venue/VenueCard.tsx`**:
-    -   A display component representing a single venue in a card format.
-    -   Shows key venue information and includes actions to "Edit" (via `VenueForm`) or "Delete" (with confirmation).
--   **`Venue/VenueForm.tsx`**:
-    -   A versatile form for creating new venues or editing existing venue details.
-    -   Manages dynamic inputs for images and amenities.
-    -   Uses `useCreateVenue` and `useUpdateVenue` hooks.
--   **`Venue/VenueList.tsx`**:
-    -   A container component that renders a grid of `VenueCard`s.
-    -   Handles loading, error states, and orchestrates delete actions for individual venues.
+### API Endpoints
 
-### UI Library Components (`components/ui`)
+The API exposes endpoints for managing both bookings and venues. Below is a high-level overview. For detailed endpoints, please refer to the `.routes.ts` files within each module.
 
-This directory contains re-usable UI components sourced from `shadcn/ui`, including but not limited to: `alert-dialog`, `alert`, `badge`, `button`, `calendar`, `card`, `dialog`, `dropdown-menu`, `form`, `input`, `label`, `popover`, `select`, `separator`, `sonner` (for toasts), `tabs`, and `textarea`. These components provide a consistent and accessible design system.
+**Bookings:**
+*   `GET /api/bookings`: Retrieve all bookings.
+*   `GET /api/bookings/:id`: Retrieve a specific booking by ID.
+*   `POST /api/bookings`: Create a new booking.
+*   `PUT /api/bookings/:id`: Update an existing booking.
+*   `DELETE /api/bookings/:id`: Delete a booking.
 
-## Libraries, Hooks, and Types
+**Venues:**
+*   `GET /api/venues`: Retrieve all venues.
+*   `GET /api/venues/:id`: Retrieve a specific venue by ID.
+*   `POST /api/venues`: Create a new venue.
+*   `PUT /api/venues/:id`: Update an existing venue.
+*   `DELETE /api/venues/:id`: Delete a venue.
 
-### API Client (`app/lib/api.ts`)
+### Deployment
 
--   **`axios`**: Configured as the HTTP client with a base URL (from `NEXT_PUBLIC_API_URL` environment variable or `http://localhost:5000/api`).
--   **Interceptors**:
-    -   **Request:** Automatically attaches `Authorization` headers with a bearer token from `localStorage`.
-    -   **Response:** Standardizes error handling, extracts data consistently, and includes logic for redirecting on 401 errors.
--   **`venueApi`**: Provides methods for all CRUD operations on venue resources.
--   **`bookingApi`**: Provides methods for CRUD operations on booking resources, including specific `updateStatus` and `getByVenue` functions.
+The application is deployed on [Render](https://render.com/). Render provides a platform to host web services, databases, and more, allowing for continuous deployment directly from a Git repository.
 
-### Custom Hooks (`app/lib/hooks.ts`)
+The `vercel.json` file might indicate a setup for serverless functions or a frontend application hosted on Vercel, which could interact with this API. However, for the API itself, Render is explicitly mentioned.
 
-Leverages `@tanstack/react-query` for declarative, efficient, and cached data fetching.
-
--   **`useVenues(params?: any)`**: Fetches a paginated and filtered list of venues.
--   **`useVenue(id: string)`**: Fetches details for a single venue by its ID.
--   **`useCreateVenue()`, `useUpdateVenue()`, `useDeleteVenue()`**: Mutations for managing venue data, automatically invalidating relevant queries on success.
--   **`useBookings(params?: any)`**: Fetches a paginated and filtered list of bookings.
--   **`useBooking(id: string)`**: Fetches details for a single booking by its ID.
--   **`useCreateBooking()`, `useUpdateBookingStatus()`**: Mutations for managing booking data.
--   **`useVenueBookings(venueId: string)`**: Fetches all bookings associated with a specific venue.
--   **Utility Hooks**:
-    -   **`useLocalStorage<T>(key: string, initialValue: T)`**: A React hook for persisting state in `localStorage`.
-    -   **`useDebounce<T>(value: T, delay: number)`**: Delays updating a value until a specified time has passed without further changes, useful for search inputs.
-    -   **`useMediaQuery(query: string)`**: Determines if a CSS media query matches the current viewport, useful for responsive design.
-
-### Utilities (`app/lib/utils.tsx`)
-
--   **`cn(...inputs: ClassValue[])`**: A utility function for conditionally joining Tailwind CSS classes, enhancing readability and maintainability of styling.
--   **`formatCurrency(amount: number)`**: Formats a numerical value (assumed to be in cents) into a user-friendly currency string (e.g., "$100.00").
-
-### Global State/Providers (`app/providers/QueryProviders.tsx`)
-
--   **`QueryClientProvider`**: Wraps the entire application (or relevant parts) to provide the React Query `QueryClient` instance, enabling all data fetching and caching capabilities.
--   **`ReactQueryDevtools`**: Included for easy debugging and monitoring of React Query's cache and requests during development.
-
-### Type Definitions (`app/types/index.ts`)
-
--   **`Venue`**: Interface defining the structure of venue objects.
--   **`Booking`**: Interface defining the structure of booking objects, including nested venue details.
--   **`CreateVenueInput`, `CreateBookingInput`**: Interfaces for the data payloads sent to create new venues or bookings.
--   **`ApiResponse<T>`, `PaginatedResponse<T>`**: Generic interfaces for standardizing API responses, including pagination metadata.
--   **`VenueFilters`, `BookingFilters`**: Interfaces for parameters used in filtering venue and booking lists.
-
-## How it Works
-
-The application operates as a single-page application (SPA) with routing handled by Next.js.
-
-1.  **Navigation**: Users navigate between different sections (Home, Venues, Bookings) using the `Header` component.
-2.  **Data Flow (Client-Side)**:
-    -   When a page or component requires data (e.g., `VenuesPage` needs venue listings), it uses a custom React Query hook (e.g., `useVenues`).
-    -   This hook internally calls the `venueApi` (or `bookingApi`) to make an HTTP request to the backend.
-    -   `axios` handles the actual network request, including attaching authentication tokens and processing responses.
-    -   React Query caches the fetched data, manages loading and error states, and automatically re-fetches data when necessary (e.g., after a mutation or when a component re-mounts).
-    -   UI components then render based on the data and state provided by the React Query hooks.
-3.  **Mutations (Client-Side)**:
-    -   When a user performs an action that modifies data (e.g., creating a booking via `BookingForm`), a React Query mutation hook (e.g., `useCreateBooking`) is used.
-    -   The mutation hook sends the data to the backend via the `bookingApi`.
-    -   Upon successful completion, the mutation automatically "invalidates" relevant cached queries, prompting React Query to re-fetch fresh data for affected lists or detail views. This ensures the UI is always up-to-date.
-4.  **Form Management**: `react-hook-form` simplifies form handling, while `zod` provides robust schema-based validation, ensuring data integrity before API submission.
-5.  **UI/UX**: `shadcn/ui` components ensure a consistent, accessible, and aesthetically pleasing user experience.
-
-## Getting Started
-
-To get a local copy up and running, follow these steps:
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [repository-url]
-    cd retreat
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-   
-    ```
-3.  **Set up environment variables:**
-    Create a `.env.local` file in the root directory and add your API base URL:
-    ```
-    NEXT_PUBLIC_API_URL=https://retreat-hotel-venue-api-dashboard.onrender.com/api
-    ```
-    *(Replace `http://localhost:5000/api` with your actual backend API URL)*
-
-4.  **Run the development server:**
-    ```bash
-    npm run dev
-   
-    ```
-    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## Contributing
-
-Contributions are welcome! Please feel free to open an issue or submit a pull request.
-
-## License
-
-This project is licensed under the MIT License.
+---
+This `README.md` provides a comprehensive overview of the Retreat Booking Management API.
